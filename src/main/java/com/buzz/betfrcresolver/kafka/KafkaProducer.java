@@ -14,10 +14,10 @@ public class KafkaProducer {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void sendEvent(MatchEndEvent event) {
+    public void sendEvent(PropResolvedEvent event) {
         try {
-            kafkaTemplate.send("match-end", event);
-            logger.info("Wrote match end event to queue: " + event.getEventId());
+            kafkaTemplate.send("prop-resolution", event);
+            logger.info("Wrote prop resolution event to queue: " + event.getPropId());
         } catch (Exception e) {
             logger.error("Unable to write match end event to queue.", e);
         }
