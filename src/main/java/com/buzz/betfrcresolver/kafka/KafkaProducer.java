@@ -17,7 +17,8 @@ public class KafkaProducer {
     public void sendEvent(PropResolvedEvent event) {
         try {
             kafkaTemplate.send("prop-resolution", event);
-            logger.info("Wrote prop resolution event to queue: " + event.getPropId());
+            logger.info("Wrote prop resolution event to queue: " + event.getPropId() +
+                    " with status: " + event.getState());
         } catch (Exception e) {
             logger.error("Unable to write match end event to queue.", e);
         }

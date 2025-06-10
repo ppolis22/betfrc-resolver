@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class KafkaConsumer {
-    private static final Logger logger = LoggerFactory.getLogger(KafkaProducer.class);
+    private static final Logger logger = LoggerFactory.getLogger(KafkaConsumer.class);
     private final PropResolverService propResolverService;
 
     public KafkaConsumer(PropResolverService propResolverService) {
@@ -22,6 +22,7 @@ public class KafkaConsumer {
             logger.error("Unable to parse object from kafka.");
             return;
         }
+        logger.info("Consumed match end event.");
         MatchEndEvent matchEndEvent = (MatchEndEvent) event;
         propResolverService.resolvePropsForMatchEnd(matchEndEvent);
     }
