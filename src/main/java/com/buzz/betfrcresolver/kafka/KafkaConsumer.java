@@ -5,6 +5,7 @@ import com.buzz.betfrcresolver.service.PropResolverService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,13 +18,14 @@ public class KafkaConsumer {
     }
 
     @KafkaListener(topics = "match-end", groupId = "resolver-service")
-    public void consumeEvent(Object event) {
-        if (!(event instanceof MatchEndEvent)) {
-            logger.error("Unable to parse object from kafka.");
-            return;
-        }
-        logger.info("Consumed match end event.");
-        MatchEndEvent matchEndEvent = (MatchEndEvent) event;
-        propResolverService.resolvePropsForMatchEnd(matchEndEvent);
+    public void consumeEvent(@Payload MatchEndEvent event) {
+//        if (!(event instanceof MatchEndEvent)) {
+//            logger.error("Unable to parse object from kafka.");
+//            return;
+//        }
+//        MatchEndEvent matchEndEvent = (MatchEndEvent) event;
+        logger.info("Consumed match end event. EventId: " + event.getEventId() +
+                ", match #: " + event.getMatchNum());
+        propResolverService.resolvePropsForMatchEnd(event);
     }
 }

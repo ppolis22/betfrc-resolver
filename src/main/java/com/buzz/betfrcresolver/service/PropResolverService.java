@@ -9,6 +9,7 @@ import com.buzz.betfrcresolver.kafka.KafkaProducer;
 import com.buzz.betfrcresolver.kafka.PropResolvedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -21,6 +22,9 @@ public class PropResolverService {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final KafkaProducer kafkaProducer;
+
+    @Value("${buzz.app.odds-service}")
+    private String oddsService;
 
     public PropResolverService(KafkaProducer kafkaProducer) {
         this.kafkaProducer = kafkaProducer;
@@ -42,7 +46,7 @@ public class PropResolverService {
     }
 
     private PropQueryResponse getPropsForMatch(String eventId, Integer matchNum) {
-        String url = "http://localhost:8080/props/event/" + eventId + "/match/" + matchNum;
+        String url = "http://" + oddsService + "/props/event/" + eventId + "/match/" + matchNum;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
