@@ -19,11 +19,6 @@ public class KafkaConsumer {
 
     @KafkaListener(topics = "match-end", groupId = "resolver-service")
     public void consumeEvent(@Payload MatchEndEvent event) {
-//        if (!(event instanceof MatchEndEvent)) {
-//            logger.error("Unable to parse object from kafka.");
-//            return;
-//        }
-//        MatchEndEvent matchEndEvent = (MatchEndEvent) event;
         logger.info("Consumed match end event. EventId: " + event.getEventId() +
                 ", match #: " + event.getMatchNum());
         propResolverService.resolvePropsForMatchEnd(event);

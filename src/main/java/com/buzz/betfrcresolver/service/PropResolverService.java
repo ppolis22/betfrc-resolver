@@ -33,6 +33,11 @@ public class PropResolverService {
     public void resolvePropsForMatchEnd(MatchEndEvent event) {
         // get all Props whose parent is the match that just ended
         PropQueryResponse propResponse = getPropsForMatch(event.getEventId(), event.getMatchNum());
+        if (propResponse == null) {
+            logger.error("Error fetching props for event.");
+            return;
+        }
+
         List<Prop> props = propResponse.getProps();
         logger.info("Retrieved " + props.size() + " props to resolve.");
 
@@ -47,6 +52,7 @@ public class PropResolverService {
 
     private PropQueryResponse getPropsForMatch(String eventId, Integer matchNum) {
         String url = "http://" + oddsService + "/props/event/" + eventId + "/match/" + matchNum;
+        logger.info("Fetching props for target match, at: " + url);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -58,11 +64,13 @@ public class PropResolverService {
                 emptyRequestEntity,
                 PropQueryResponse.class);
 
+        logger.info("Props fetch response: " + response.getStatusCode());
         // TODO validate
         return response.getBody();
     }
 
     private void sendResolvedEvents(List<PropResolvedEvent> events) {
+        logger.info("Writing Prop Resolved Event(s)");
         for (PropResolvedEvent event : events) {
             kafkaProducer.sendEvent(event);
         }
