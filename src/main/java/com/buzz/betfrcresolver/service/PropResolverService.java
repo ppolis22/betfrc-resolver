@@ -11,9 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -28,17 +31,24 @@ public class PropResolverService {
 
     public PropResolverService(KafkaProducer kafkaProducer) {
         this.kafkaProducer = kafkaProducer;
+        this.restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
+            @Override
+            public boolean hasError(ClientHttpResponse response) throws IOException {
+                return false;
+            }
+        });
     }
 
     public void resolvePropsForMatchEnd(MatchEndEvent event) {
         // get all Props whose parent is the match that just ended
-        PropQueryResponse propResponse = getPropsForMatch(event.getEventId(), event.getMatchNum());
-        if (propResponse == null) {
+        ResponseEntity<PropQueryResponse> propResponse = getPropsForMatch(
+                event.getEventId(), event.getMatchNum());
+        if (!propResponse.getStatusCode().is2xxSuccessful() || propResponse.getBody() == null) {
             logger.error("Error fetching props for event.");
             return;
         }
 
-        List<Prop> props = propResponse.getProps();
+        List<Prop> props = propResponse.getBody().getProps();
         logger.info("Retrieved " + props.size() + " props to resolve.");
 
         // for each prop, look at propType and determine win/lose state
@@ -50,7 +60,7 @@ public class PropResolverService {
         }
     }
 
-    private PropQueryResponse getPropsForMatch(String eventId, Integer matchNum) {
+    private ResponseEntity<PropQueryResponse> getPropsForMatch(String eventId, Integer matchNum) {
         String url = "http://" + oddsService + "/props/event/" + eventId + "/match/" + matchNum;
         logger.info("Fetching props for target match, at: " + url);
 
@@ -65,8 +75,7 @@ public class PropResolverService {
                 PropQueryResponse.class);
 
         logger.info("Props fetch response: " + response.getStatusCode());
-        // TODO validate
-        return response.getBody();
+        return response;
     }
 
     private void sendResolvedEvents(List<PropResolvedEvent> events) {

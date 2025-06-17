@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class KafkaProducer {
     private static final Logger logger = LoggerFactory.getLogger(KafkaProducer.class);
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, PropResolvedEvent> kafkaTemplate;
 
-    public KafkaProducer(KafkaTemplate<String, Object> kafkaTemplate) {
+    public KafkaProducer(KafkaTemplate<String, PropResolvedEvent> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
